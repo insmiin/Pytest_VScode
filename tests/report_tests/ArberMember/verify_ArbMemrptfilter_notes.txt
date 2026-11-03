@@ -1,0 +1,17 @@
+0) Add test cases to a CSV file
+-Each row in the CSV represents one test case, corresponding to a single click or search.
+-The header & values in the CSV must match BOTH the fieldname&values returned in the API RESPONSE to enable easy comparison (e.g., companyName = IMDEMO, companyID = 7).
+
+1) Read the CSV file into a list of dictionaries
+-Each row becomes a dictionary, resulting in a list of test cases.
+
+2) Process and format each test case. for each row do below:
+-For columns that cannot be processed by API request(due to format inconsistency) create additional variables to store the format required by the API request.
+-For example, the CSV may contain company = IMDEMO (matching the API response), but the API request requires coyid = 7.
+ Therefore, create a new variable API_* to store coyid corresponding to companyName, and pass this variable to API request
+ Retain the original column , as we still need to use them to compare with API response
+
+3)for each testcase, trigger Search Report,
+-use filtering from each test case, call ArberMemberReport API to return matching records 
+-for each records, assert that it meet all the filtering applied
+  

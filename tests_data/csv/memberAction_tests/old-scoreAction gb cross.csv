@@ -1,0 +1,444 @@
+notes(not used),traceability,testcase,memberCode,companyID,hitType,gbRuleScore,toActionFlag,prerequisite1,prerequisite2,prerequisite3,EditUpdatedDate,pre_actionOnOffFlag,post_actionOnOffFlag,,,
+,"sample for 559,dun delete 1st",,gbmock_t3442n040,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:2
+CyberBD:3
+OthersBD:4
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0","byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,"outsideValidPeriod:yes
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,,1,gbmock_t3442n040,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,2,gbmock_t3442n040,3442,FAMember - Invalid Key,,Action#1,,,,"outsideValidPeriod:yes
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+"**==seq of triggering
+  1)reset to initialise member(auto, not from csv)
+  2)prerequisite
+  3)editUpdByDate
+ 4)pre_actionOnOffFlag
+ 5)module hit
+ 6)post_actionOnOffFlag(tear down)",cross#1,,gbmock_t3442n002,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,5
+"*==Prerequisite fields Notes:==
+*to initialise member,
+due to bugs/design:(1) when update from compliance, sys upd only into mysql user columns. when update from merch, sys upd into both user & merchant columns. (2) when performing manual trigger(by compliance /merchant) ,no update will happen if member's existing BL/SG is of the same value.
+   For all TC, always initialise with 100%,A. this is to ensure testcase really starts executing from fresh. if existing manual value(especially merch) is not clear, it might cause all hit before the last hit to yield diff result than the one u documented. Do below:
+   1)TC WITHOUT merchUpd->initialise with complianceUpd 100%/A. 
+   2)TC WITH merchUpd->initialise with MerchUpd 100%/A 1st, then ComplianceUpd(except BL/SG,cox they're already updated by merchant, it wont get updated anymore if existing is same value)
+   3)for all ManualUpd(compl/merch) in TC, MAKE SURE VALUE TO UPDATE IS DIFF FROM EXISTING ONE,else no update will happen(my py will throw warning for this). in case same, add 1 more update in front with different value.
+*to save time on initialization, only use gbmock_txxxMERxxx for TC with merchValue(i.egbmock_t3442mer#). so only few members need merchant update.
+
+",,,gbmock_t3442n002,3442,Arber - Real BB,50,yes,,,,,,,,,6
+"*byUser:yes is to manual trigger from GB
+*byUser:no is to manual trigger as Merchant from SFBO
+*byUser:no_sqledit is only use to replace 'byUser:no' when merchant upgrade cannot proceed",,,gbmock_t3442n002,3442,FAMember - Invalid Key,,Action#1,,,,,,,,,7
+"**to manual trigger using PG group,eg 'initialise resetA'(165) & 'BetDelay 1'(275)
+all value muz tally with PG group. Except For 999, can put empty,py will change to 999
+
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:165
+isManualRevised:999
+
+memberSettingProfileID:999
+spreadGroupID:999
+memberCategoryID:999
+isAdvised:999
+memberProfileGroupID:275
+isManualRevised:999",,,gbmock_t3442n002,3442,Arber - Real BB,20,yes,,,,,,,,,8
+"**to manual trigger w/o PG group ,upd only field that is to be updated,the rest leave them empty.py will manual upd to 999(eg.isManualRevised will send as 999 no change to system)
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",cross#2,,gbmock_t3442n007,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+"*==gbRuleScore & toActionFlag ==
+*Gbfeature can ignore
+*Gbrule must have",(chg invkey to Action#1),,gbmock_t3442n007,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+"*===EditUpdatedDate===
+outsideValidPeriod:no  [yes=jz expired, no=almst expired]
+module_to_Upd:EGON   [same as hitype/simulatortype]
+upd_module_DT:yes     [upd hit/action date of modules?]
+upd_memsetting_DT:yes  [up bd/sg/bl/memCat of member?]",,,gbmock_t3442n007,3442,Arber - Real BB,20,yes,,,,,,,,,
+"* ==pre/post_actionOnOffFlag==
+*this is for featureOnOff_action flag. Value is on or off
+flag:off
+hittype_to_Upd:Arber - Real BB",,,gbmock_t3442n007,3442,Arber - Real BB,50,yes,,,,,,,,,
+"**hitType to use:
+Arber - Real Soccer
+Arber - Real BB
+FAMember - Exceed API Count
+LateBet - Real Basketball
+MBR - Real Basketball
+MBR - Real Soccer
+ML UI Level - Robot
+ML Wager Level
+TWM - Real Basketball
+TWM - Real Soccer
+Late Bet
+FAMember - Invalid Key
+MLTag UI Arber
+EGON
+ISBBR - Real Basketball",cross#3,,gbmock_t3442n008,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n008,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n008,3442,Arber - Real BB,50,yes,,,,,,,,,
+,,,gbmock_t3442n008,3442,Arber - Real BB,20,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:6
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1",,,,,,,,
+,cross#4,,gbmock_t3442n009,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,9
+,,,gbmock_t3442n009,3442,MBR - Real Basketball,50,yes,,,,,,,,,10
+,,,gbmock_t3442n009,3442,Arber - Real BB,20,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1","byUser:yes
+memberSettingProfileID:5
+spreadGroupID:7
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,,11
+,cross#5,,gbmock_t3442n059,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n059,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n059,3442,Arber - Real BB,20,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1","byUser:yes
+memberSettingProfileID:20
+spreadGroupID:3
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,,
+rerun,cross#6,,gbmock_t3442n060,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n060,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n060,3442,Arber - Real BB,20,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1",,,,,,,
+,cross#7_merch,,gbmock_t3442mer015,3442,FAMember - Invalid Key,,Action#1,"byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,
+,,,gbmock_t3442mer015,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442mer015,3442,Arber - Real BB,20,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1","byUser:no
+memberSettingProfileID:5
+spreadGroupID:7
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,,
+,cross#8,,gbmock_t3442n006,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n006,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n006,3442,MBR - Real Soccer,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:",,,,,,,,
+,cross#9,,gbmock_t3442n003,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,1
+,,,gbmock_t3442n003,3442,MBR - Real Soccer,60,yes,,,,,,,,,2
+,cross#10a,,gbmock_t3442n010,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n010,3442,Arber - Real BB,50,yes,,,,,,,,,
+,,,gbmock_t3442n010,3442,FAMember - Invalid Key,,Action#1,,,,"outsideValidPeriod:no
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,,,gbmock_t3442n010,3442,FAMember - Invalid Key,,Action#1,,,,"outsideValidPeriod:yes
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,cross#10b,,gbmock_t3442n022,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n022,3442,ISBBR - Real Basketball,,Action#1,,,,,,,,,
+,,,gbmock_t3442n022,3442,Arber - Real BB,50,yes,,,,,,,,,
+,,,gbmock_t3442n022,3442,ISBBR - Real Basketball,,Action#1,,,,"outsideValidPeriod:yes
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,cross#10c,,gbmock_t3442n070,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n070,3442,Arber - Real BB,60,yes,,,,,,,,,
+,,,gbmock_t3442n070,3442,TWM - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n070,3442,TWM - Real Basketball,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:EGON
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,cross#10d,,gbmock_t3442n072,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n072,3442,FAMember - Invalid Key,,Action#1,,,,,,,,,
+,,,gbmock_t3442n072,3442,ISBBR - Real Basketball,,action #1,,,,"outsideValidPeriod:no
+module_to_Upd:EGON
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,,,gbmock_t3442n072,3442,ISBBR - Real Basketball,,action #1,,,,"outsideValidPeriod:yes
+module_to_Upd:EGON
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,cross#10e,,gbmock_t3442n073,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n073,3442,ISBBR - Real Basketball,,Action#1,,,,,,,,,
+,,,gbmock_t3442n073,3442,Arber - Real BB,60,yes,,,,,,,,,
+,,,gbmock_t3442n073,3442,Arber - Real BB,60,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:ISBBR - Real Basketball
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,"cross#11
+*2 more steps with whitelist, do it manually",,gbmock_t3442n011,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:",,,,,,,,
+,,,gbmock_t3442n011,3442,MBR - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n011,3442,MBR - Real Basketball,50,yes,,,,,"flag:off
+hittype_to_Upd:MBR - Real Basketball","flag:on
+hittype_to_Upd:MBR - Real Basketball",,,
+,,,gbmock_t3442n011,3442,MBR - Real Basketball,60,yes,,,,,,,,,
+,cross#12_merch,,gbmock_t3442mer016,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:0","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,
+,,,gbmock_t3442mer016,3442,MBR - Real Soccer,60,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1","byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,,
+,cross#13_merch,,gbmock_t3442mer017,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,
+,,,gbmock_t3442mer017,3442,MBR - Real Soccer,60,yes,"byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1",,,,,,,
+,cross#14_merch,,gbmock_t3442mer018,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,3
+,,,gbmock_t3442mer018,3442,MBR - Real Soccer,60,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1","byUser:no
+memberSettingProfileID:5
+spreadGroupID:4
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:8
+spreadGroupID:7
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,4
+,cross#15,,gbmock_t3442n013,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n013,3442,MBR - Real Soccer,60,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:1",,,,,,,,
+,cross#16,,gbmock_t3442n012,3442,EGON,50,yes,,,,,,,,,
+,,,gbmock_t3442n012,3442,TWM - Real Basketball,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:EGON
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
+,,,gbmock_t3442n012,3442,MBR - Real Basketball,80,yes,,,,,,,,,
+,cross#17,,gbmock_t3442n001,3442,Arber - Real BB,10,yes,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,,,
+,,,gbmock_t3442n001,3442,TWM - Real Basketball,50,yes,,,,,,,,,
+,,,gbmock_t3442n001,3442,TWM - Real Basketball,80,yes,,,,,,,,,

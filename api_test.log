@@ -1,0 +1,1 @@
+INFO     tests.API_tests.GBCRQ-557:GBCRQ-557.py:24 json response => : {'totalCount': 0, 'pageSize': 0, 'page': 0, 'data': [], 'result': False, 'message': 'An unexpected error occurred. Please try again.'}

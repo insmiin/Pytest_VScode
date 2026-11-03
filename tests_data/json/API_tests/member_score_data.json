@@ -1,0 +1,46 @@
+[
+    {
+        "testcase": "multiple_members",
+        "test_data": [
+            {
+                "MemberID": 220175,
+                "CompanyID": 2395,
+                "expected_GBRiskScore": 10
+            },
+            {
+                "MemberID": 220176,
+                "CompanyID": 2395,
+                "expected_GBRiskScore": 10
+            }
+        ],
+        "expected": {
+            "status_code": 200,
+            "response_code": 0,
+            "response_message": "Success"
+        }
+    },
+    {
+        "testcase": "single_member",
+        "test_data": [
+            {
+                "MemberID": 220175,
+                "CompanyID": 2395,
+                "expected_GBRiskScore": 10
+            }
+        ],
+        "expected": {
+            "status_code": 200,
+            "response_code": 0,
+            "response_message": "Success"
+        }
+    },
+    {
+        "testcase": "empty_request",
+        "test_data": null,
+        "expected": {
+            "status_code": 200,
+            "response_code": 10999,
+            "response_message": ""
+        }
+    }
+]

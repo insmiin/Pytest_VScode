@@ -1,0 +1,533 @@
+begin
+with temp_affected_wagers as
+(
+select  lw.wagerno,lw.MemberID,lw.MemberCode,lw.CompanyID,lw.CompanyName,lw.WagerID,WagerTypeID,WagerSourceID,
+  lw.CreatedDate,	lw.UpdatedDate,	lw.IsCancelled,	IsSettled,	IsBetTrade,	OddsTypeId,	OddsTypeName,	StakeAmount,	WinLoseAmount,	WinLoseMultiplier,	PotentialPayoutAmount,
+  PotentialExposureAmount,TurnOver,	WagerEventDate,	SettledDate,MemberIpAddress,	lw.MemberCategoryID,lw.GBCreatedDate,	lw.GBUpdatedDate,EventID,EventDate,
+  CompetitionName,MarketID,sp.SportID,sp.SportNAme,PeriodID,lwi.BetTypeID,bt.bettypeName,BetTypeSelectionID,MarketTypeID,exchangerate,BuyBackAmount,partnerid ,combogroupid,lw.ComboSelectionID, wagerComboSelection,  WagerSourceName,MemLvlMemberCategoryName
+FROM `ghostbuster-dev.RAW.SF_LiveWager`   lw
+       inner join `ghostbuster-dev.RAW.SF_LiveWagerItem` lwi  on lw.wagerno = lwi.wagerno
+       inner join ghostbuster-dev.RAW.SF_Member m on lw.memberid = m.memberid
+       left join (select distinct sportid,sportname from ghostbuster-stg.MSSQL.SF_Sport) sp on lwi.sportid = sp.sportid
+       left join (select distinct bettypeid,bettypeName from ghostbuster-stg.MSSQL.SF_BetType) bt on lwi.bettypeid = bt.bettypeid
+       where 1=1
+       and issettled = 1
+       and wagereventdate >= '{P_fromdt}' and wagereventdate < '{P_todt}'
+       and upper(m.membercode) = upper('{P_members}') and m.companyid = {P_coyid}
+       --and periodid in (1,2) and wagertypeid = 2
+       --and bettypeid in (1,10,2) and marketid = 3 and wagersourceid in (1,2) and combogroupid in (0,1,9)
+
+)
+
+-----combo wagers
+,combo_affected_wagers as --some fields are renamed to 'combo' or 9999
+(
+select *
+ from(
+    select MemberID,MemberCode,CompanyID,CompanyName,WagerID,WagerTypeID,WagerSourceID,
+    CreatedDate,	UpdatedDate,	IsCancelled,	IsSettled,	IsBetTrade,	OddsTypeId,	OddsTypeName,	StakeAmount,	WinLoseAmount,	WinLoseMultiplier,	PotentialPayoutAmount,
+    PotentialExposureAmount,TurnOver,	WagerEventDate,	SettledDate,MemberIpAddress,	MemberCategoryID,GBCreatedDate,	GBUpdatedDate,EventID,EventDate,
+    CompetitionName,0000 MarketID,0000 SportID,'Combo' SportNAme,PeriodID, BetTypeID,'Combo' as bettypeName,BetTypeSelectionID,MarketTypeID,exchangerate,BuyBackAmount,partnerid ,combogroupid,ComboSelectionID,wagerComboSelection,  WagerSourceName,
+    MemLvlMemberCategoryName,ROW_NUMBER() OVER (PARTITION BY wagerno) rn
+       FROM temp_affected_wagers
+       where 1=1
+       and wagertypeid = 2
+  )
+  where rn=1
+)
+----single wagers
+,single_affected_wagers as (   --columns order mz be consistent with combo table
+ select MemberID,MemberCode,CompanyID,CompanyName,WagerID,WagerTypeID,WagerSourceID,
+  CreatedDate,	UpdatedDate,	IsCancelled,	IsSettled,	IsBetTrade,	OddsTypeId,	OddsTypeName,	StakeAmount,	WinLoseAmount,	WinLoseMultiplier,	PotentialPayoutAmount,
+  PotentialExposureAmount,TurnOver,	WagerEventDate,	SettledDate,MemberIpAddress,	MemberCategoryID,GBCreatedDate,	GBUpdatedDate,EventID,EventDate,CompetitionName,MarketID,SportID,SportNAme,PeriodID,
+   BetTypeID, bettypeName,BetTypeSelectionID,MarketTypeID,exchangerate,BuyBackAmount,partnerid, combogroupid,ComboSelectionID,wagerComboSelection,WagerSourceName,MemLvlMemberCategoryName,1 rn
+  from temp_affected_wagers
+  where 1=1 and wagertypeid = 1
+)
+,affected_wagers as (
+  select * from combo_affected_wagers
+  union all
+  select * from single_affected_wagers
+)
+-----------TABLES---------
+,Daily as
+(select date(timestamp_add(wagereventdate,interval -4 hour)) eventDate, count(*) betcount, sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(if(issettled = 1, WinLoseAmount*ExchangeRate,0))    -    sum(if(isbettrade=1 and issettled =1 , PotentialExposureAmount*ExchangeRate - BuyBackAmount*ExchangeRate + WinLoseAmount*ExchangeRate ,0))    winLoseBTAmount,
+safe_divide(   sum(if(issettled = 1, WinLoseAmount*ExchangeRate,0))    -    sum(if(isbettrade=1 and issettled =1 , PotentialExposureAmount*ExchangeRate - BuyBackAmount*ExchangeRate + WinLoseAmount*ExchangeRate ,0)   ) , sum(if(issettled =1 , PotentialExposureAmount*ExchangeRate,0)) )*100 winLossPercentage,
+safe_divide(sum(StakeAmount*exchangerate),count(*)) BetSize
+from affected_wagers
+group by eventDate
+)
+,Daily_total as
+(
+select * from Daily    --9999-01-01 is the total
+union all
+select '0001-01-01',sum(betcount), sum(turnoverAmountBase),sum(winLoseBTAmount),safe_divide( sum(winLoseBTAmount),sum(turnoverAmountBase) )*100,safe_divide(sum(turnoverAmountBase) ,sum(betcount))
+from Daily
+)
+
+--//****Monthly performance(merge both single & combo)****
+,Monthly_stg as (
+SELECT DATE_TRUNC(date(timestamp_add(wagereventdate,interval -4 hour)),month) as  eventMonth, count(*) betcount, sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt,
+sum(if(WinLoseAmount*exchangerate>0,Stakeamount*exchangerate,0)) WinAmt, sum(if(WinLoseAmount*exchangerate>0,1,0)) WinCount,
+sum(if(WinLoseAmount*exchangerate<0,Stakeamount*exchangerate,0)) LoseAmt, sum(if(WinLoseAmount*exchangerate<0,1,0)) LoseCount,
+sum(WinLoseAmount*ExchangeRate) - sum(if (IsBetTrade=1,(PotentialExposureAmount - BuyBackAmount + WinLoseAmount)*ExchangeRate ,0))  winLoseBTAmount,
+safe_divide(  (sum(WinLoseAmount*ExchangeRate) - sum(if (IsBetTrade=1,(PotentialExposureAmount - BuyBackAmount + WinLoseAmount)*ExchangeRate ,0))),  sum(PotentialExposureAmount*ExchangeRate))*100 winLossPercentage,
+safe_divide(sum(StakeAmount*exchangerate),count(*)) BetSize,
+sum(if(iscancelled = 1, potentialExposureAmount*exchangeRate,0)) CancelExp
+--safe_divide(sum(if(WinLoseAmount*exchangerate>0,Stakeamount*exchangerate,0)),sum(if(WinLoseAmount*exchangerate>0,1,0))) Win_AVG,
+--safe_divide(sum(if(WinLoseAmount*exchangerate<0,Stakeamount*exchangerate,0)),sum(if(WinLoseAmount*exchangerate<0,1,0))) Lose_AVG
+from affected_wagers
+GROUP BY eventMonth
+)
+,Monthly as
+(
+  select eventMonth,betcount,turnoverAmountBase,winLoseBTAmount,winLossPercentage,betsize,safe_divide(CancelExp,sum(CancelExp) over())*100  as cancelledExposureVolume,
+  safe_divide(safe_divide(WinAmt,WinCount)-safe_divide(LoseAmt,loseCount),safe_divide(LoseAmt,loseCount))*100 as avgWinLossDifferent --NaN means either no win or lose betcount
+  from Monthly_STG
+)
+,Monthly_total as
+(
+select * from Monthly
+union all
+  select '9999-01-01', sum(betcount),sum(turnoverAmountBase),
+  sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,
+  safe_divide(sum(turnoverAmountBase) ,sum(betcount)),
+safe_divide(sum(CancelExp),sum(CancelExp) )*100  as cancelledExposureVolume,
+  safe_divide(   safe_divide(sum(WinAmt),sum(WinCount))  - safe_divide(sum(LoseAmt),sum(Losecount))   ,  safe_divide(sum(LoseAmt),sum(Losecount))   )*100 avgWinLossDifferent
+  from Monthly_STG
+)
+
+
+--//****Sport performance(seperate the single & combo)****
+,Sport_STG as
+(
+SELECT SportNAme, sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt,
+sum(if(WinLoseAmount*exchangerate>0,Stakeamount*exchangerate,0)) WinAmt, sum(if(WinLoseAmount*exchangerate>0,1,0)) WinCount,
+sum(if(WinLoseAmount*exchangerate<0,Stakeamount*exchangerate,0)) LoseAmt, sum(if(WinLoseAmount*exchangerate<0,1,0)) LoseCount,
+sum(WinLoseAmount*ExchangeRate) - sum(if (IsBetTrade=1,(PotentialExposureAmount - BuyBackAmount + WinLoseAmount)*ExchangeRate ,0))  winLoseBTAmount,
+safe_divide(  (sum(WinLoseAmount*ExchangeRate) - sum(if (IsBetTrade=1,(PotentialExposureAmount - BuyBackAmount + WinLoseAmount)*ExchangeRate ,0))),  sum(PotentialExposureAmount*ExchangeRate))*100 winLossPercentage,
+sum(if(iscancelled = 1, potentialExposureAmount*exchangeRate,0)) CancelExp,
+sum(if(partnerid = 1, StakeAmount*exchangeRate,0)) brobtSourceVolume
+from affected_wagers
+group by SportNAme
+)
+,sport as
+(
+  select SportNAme,turnoverAmountBase,winLoseBTAmount,winLossPercentage ,safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume,safe_divide(CancelExp,sum(CancelExp) over())*100  as cancelledExposureVolume,safe_divide(brobtSourceVolume,sum(brobtSourceVolume) over())*100  as brobtSourceVolume,
+    safe_divide(safe_divide(WinAmt,WinCount)-safe_divide(LoseAmt,loseCount),safe_divide(LoseAmt,loseCount))*100 as avgWinLossDifferent
+  from Sport_STG
+)
+,sport_total as
+(
+  select * from sport
+  union all
+  select 'zTotal', sum(turnoverAmountBase),  sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage, safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume, safe_divide(sum(CancelExp),sum(CancelExp) )*100  as cancelledExposureVolume,
+  safe_divide(sum(brobtSourceVolume),sum(brobtSourceVolume))*100  as brobtSourceVolume,
+  safe_divide(   safe_divide(sum(WinAmt),sum(WinCount))  - safe_divide(sum(LoseAmt),sum(Losecount))   ,  safe_divide(sum(LoseAmt),sum(Losecount))   )*100 avgWinLossDifferent
+  from sport_stg
+)
+
+,combo_stg as(
+SELECT wagerComboSelection, sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers
+where wagertypeid = 2
+GROUP BY wagerComboSelection
+)
+,combo as
+(
+  select wagerComboSelection, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from combo_stg
+)
+
+,combo_total as
+(
+  select * from combo
+  union all
+  select 'zTotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from combo_stg
+)
+
+,tier_stg as(
+SELECT if(aw.sportid=1 or aw.sportid=2,IFNULL(LeagueGrp2,'Tier 3'),'OtherSports') LeagueGrp2,
+sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+left join ghostbuster-dev.RAW.SF_CompetitionLeague cl
+on aw.sportid = cl.sportid and upper(aw.competitionName)= upper(cl.CompetitionName)
+where wagertypeid = 1
+GROUP BY LeagueGrp2
+)
+
+,tier as
+(
+  select LeagueGrp2, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from tier_stg
+)
+
+,tier_total as
+(
+  select * from tier
+  union all
+  select 'zTotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from tier_stg
+)
+
+
+
+,wagersource_stg as(
+SELECT case WagerSourceName when 'Internet' then 'Web' else WagerSourceName end as WagerSourceName,
+ sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+GROUP BY WagerSourceName
+)
+,wagersource as
+(
+  select WagerSourceName, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from wagersource_stg
+)
+,wagersource_total as
+(
+  select * from wagersource
+  union all
+  select 'zTotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from wagersource_stg
+)
+--//******Markettype performance(separate single & combo) ******
+,markettype_stg as(
+SELECT case marketid when 1 then 'PM' when 2 then 'PM' when 3 then 'RB' when 0000 then 'Combo' end as marketName
+, sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+GROUP BY marketName
+)
+,markettype as
+(
+  select marketName, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from markettype_stg
+)
+
+
+,markettype_total as
+(
+  select * from markettype
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from markettype_stg
+)
+--//******competitionName performance(only single) ******
+,competition_stg as(
+SELECT  competitionName,sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+where wagertypeid = 1
+GROUP BY competitionName
+)
+,competition as
+(
+  select competitionName, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from competition_stg
+)
+,competition_total as
+(
+  select * from competition
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from competition_stg
+)
+--//******bettypeName performance( single & cobo) ******
+,bettype_stg as(
+SELECT  bettypeName,sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+GROUP BY bettypeName
+)
+,bettype as
+(
+  select bettypeName, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from bettype_stg
+)
+,bettype_total as
+(
+  select * from bettype
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from bettype_stg
+)
+--//******IPaddress & country performance( single & cobo) ****** country need to get from ELT..not refined yet for this part
+,ipaddress_stg as(
+SELECT  memberipaddress,sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+GROUP BY memberipaddress
+)
+,ipAddress as
+(
+  select memberipaddress, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from ipAddress_stg
+)
+,ipAddress_total as
+(
+  select * from ipAddress
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from ipAddress_stg
+)
+---WinLoss Different table (merge of single & combo)
+,winlossDiff_stg as
+(
+  select
+  sum(if(WinLoseAmount*exchangerate>0,Stakeamount*exchangerate,0)) winStakeAmountBase, sum(if(WinLoseAmount*exchangerate>0,1,0)) WinCount,
+sum(if(WinLoseAmount*exchangerate<0,Stakeamount*exchangerate,0)) loseStakeAmountBase, sum(if(WinLoseAmount*exchangerate<0,1,0)) LoseCount
+from affected_wagers
+),
+WinLossDiff as
+(
+  select WinCount,LoseCount,winStakeAmountBase,loseStakeAmountBase,safe_divide(winStakeAmountBase,WinCount) avgWin,safe_divide(loseStakeAmountBase,LoseCount) avgLose,safe_divide(safe_divide(winStakeAmountBase,WinCount)-safe_divide(loseStakeAmountBase,loseCount),safe_divide(loseStakeAmountBase,loseCount))*100 as avgWinLossDifferent
+  from WinLossDiff_STG
+)
+--//******Wager MemberCategory performance( single & cobo) ****** country need to get from ELT..not refined yet for this part
+,WagerMemCategory_stg as(
+SELECT  MemLvlMemberCategoryName,sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+where wagertypeid = 1
+GROUP BY MemLvlMemberCategoryName
+)
+,WagerMemCategory as
+(
+  select MemLvlMemberCategoryName, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from WagerMemCategory_stg
+)
+,WagerMemCategory_total as
+(
+  select * from WagerMemCategory
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from WagerMemCategory_stg
+)
+--//******stakeRange (merge single & combo) ******
+,Stake_stg as(
+SELECT  case
+when stakeamount*exchangerate <=100 then '01.100 and below'
+when stakeamount*exchangerate >100 and stakeamount*exchangerate <=500 then '02.>100 to 500'
+when stakeamount*exchangerate >500 and stakeamount*exchangerate <=1000 then '03.>500 to 1K'
+when stakeamount*exchangerate >1000 and stakeamount*exchangerate <=2000 then '04.>1K to 2K'
+when stakeamount*exchangerate >2000 and stakeamount*exchangerate <=5000 then '05.>2K to 5K'
+when stakeamount*exchangerate >5000 and stakeamount*exchangerate <=10000 then '06.>5K to 10K'
+when stakeamount*exchangerate >10000 and stakeamount*exchangerate <=20000 then '07.>10K to 20K'
+when stakeamount*exchangerate >20000 and stakeamount*exchangerate <=30000 then '08.>20K to 30K'
+when stakeamount*exchangerate >30000 and stakeamount*exchangerate <=50000 then '09.>30K to 50K'
+when stakeamount*exchangerate >50000 and stakeamount*exchangerate <=100000 then '10.>50K to 100K'
+when stakeamount*exchangerate >100000 and stakeamount*exchangerate <=200000 then '11.>100K to 200K'
+when stakeamount*exchangerate >200000 and stakeamount*exchangerate <=300000 then '12.>200K to 300K'
+when stakeamount*exchangerate >300000 and stakeamount*exchangerate <=400000 then '13.>300K to 400K'
+when stakeamount*exchangerate >400000 and stakeamount*exchangerate <=500000 then '14.>400K to 500K'
+when stakeamount*exchangerate >500000 then '15.>500K'
+end as stakeRange,
+sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+GROUP BY stakeRange
+)
+,stake as
+(
+  select stakeRange, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from stake_stg
+)
+,stake_total as
+(
+  select * from stake
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from stake_stg
+)
+--//******overall perf ******
+,overall_stg as(
+SELECT  case bettypeName when 'Combo' then 'Combo' else 'Single' end as BetTypeName,sum(StakeAmount*exchangerate) turnoverAmountBase,
+sum(WinLoseAmount*exchangerate) winLoseAmountBase,
+sum(if(IsBetTrade=1,PotentialExposureAmount*exchangerate,0)) BTexpAmt,
+sum(if(IsBetTrade=1,BuyBackAmount*exchangerate,0)) BTamt,
+sum(PotentialExposureAmount* exchangeRate) expAmt,
+sum(if(IsBetTrade=1,WinLoseAmount*exchangerate,0)) BTWLAmt
+from affected_wagers aw
+GROUP BY bettypeName
+)
+,overall as
+(
+  select bettypeName, turnoverAmountBase,
+  winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount,
+safe_divide( (winLoseAmountBase - (BTexpAmt-BTamt+BTWLAmt)),  expAmt)*100 winLossPercentage,
+   safe_divide(turnoverAmountBase,sum(turnoverAmountBase) over())*100  as turnoverVolume
+   from overall_stg
+)
+,overall_total as
+(
+  select * from overall
+  union all
+  select 'ztotal' ,sum(turnoverAmountBase),
+    sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt)  winLoseBTAmount, safe_divide(sum(winLoseAmountBase) - sum(BTexpAmt-BTamt+BTWLAmt), sum(expAmt))*100 winLossPercentage,safe_divide(sum(turnoverAmountBase),sum(turnoverAmountBase))*100  as turnoverVolume
+  from overall_stg
+)
+
+select 'Daily' performanceTypeName,eventDate,null eventMonth, null sportName, null wagerComboSelection, null competitionTierGroup, null wagerSourceName,
+ null  marketName, null  competitionName,  null  betTypeName, betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,betSize, null  cancelledExposureVolume,
+ null  avgWinLossDifferent, null  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null avgWin, null  avgLose, null  stakeRange,
+ null  ipAddress, null  countryName, null  wagerMemberCategoryID, null wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  Daily
+ union all
+ select  'Monthly'  performanceTypeName, null  eventDate, eventMonth,  null  sportName, null  wagerComboSelection,  null  competitionTierGroup,null  wagerSourceName,
+ null  marketName,null competitionName, null betTypeName, betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,betSize, cancelledExposureVolume,
+ null  avgWinLossDifferent, null  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  Monthly
+ union all
+ select 'Sport' performanceTypeName,null eventDate,null eventMonth,  sportName, null wagerComboSelection, null competitionTierGroup, null wagerSourceName,
+ null  marketName, null  competitionName,  null  betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize,   cancelledExposureVolume,
+ null  avgWinLossDifferent,   turnoverVolume,   brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase,null avgWin, null  avgLose, null  stakeRange,
+ null  ipAddress, null  countryName, null  wagerMemberCategoryID, null wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  Sport
+ union all
+  select  'Combo'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,   wagerComboSelection,  null  competitionTierGroup,null  wagerSourceName,
+ null  marketName,null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  combo
+ union all
+  select  'Tier'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  LeagueGrp2  competitionTierGroup,null  wagerSourceName,
+ null  marketName,null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  tier
+ union all
+   select  'WagerSource'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   wagerSourceName, null  marketName,null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  WagerSource
+ union all
+   select  'Market'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName, marketName, null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  markettype
+ union all
+   select  'Competition'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName,
+  null marketName,  competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  competition
+Union all
+  select  'BetType'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName,
+ null marketName, null competitionName,  betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  bettype
+ union all
+  select  'IPAddress'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName,
+  null marketName,  null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ memberipaddress as  ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  ipaddress
+ union all
+ select  'Overall'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName,
+  null marketName,  null competitionName, null betTypeName, null betCount,null  turnoverAmountBase,  null  potentialExposureAmountBase  ,null winLoseBTAmount,null winLossPercentage,null betSize, null cancelledExposureVolume,
+  avgWinLossDifferent, null turnoverVolume, null  brobtSourceVolume,   winCount,   loseCount,    winStakeAmountBase,   loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+ null ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  WinLossDiff
+union all
+ select  'WagerMemberCategory'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName,
+  null marketName,  null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase,winLoseBTAmount,winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, null stakeRange,
+null  ipAddress, null countryName, null  wagerMemberCategoryID, MemLvlMemberCategoryName  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  WagerMemCategory
+ union all
+  select  'StakeRange'  performanceTypeName, null  eventDate, null eventMonth,  null  sportName,  null wagerComboSelection,  null  competitionTierGroup,   null wagerSourceName,
+  null marketName,  null competitionName, null betTypeName, null betCount, turnoverAmountBase,  null  potentialExposureAmountBase, winLoseBTAmount, winLossPercentage,null betSize, null cancelledExposureVolume,
+ null  avgWinLossDifferent,  turnoverVolume, null  brobtSourceVolume, null  winCount, null  loseCount,  null  winStakeAmountBase, null  loseStakeAmountBase, null  avgWin, null  avgLose, stakeRange stakeRange,
+ null ipAddress, null countryName, null  wagerMemberCategoryID, null  wagerMemberCategoryName, null  goodBadPrice, null  maxCreatedDate, null  totalCount
+ from  Stake
+ --continue to union all other tables
+;end

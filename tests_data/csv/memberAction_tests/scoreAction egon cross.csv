@@ -1,0 +1,1749 @@
+notes(not used),traceability,testcase,memberCode,companyID,hitType,gbRuleScore,toActionFlag,prerequisite1,prerequisite2,prerequisite3,EditUpdatedDate,pre_actionOnOffFlag,post_actionOnOffFlag,
+"*byUser:yes is to manual trigger from GB
+*byUser:no is to manual trigger as Merchant from SFBO
+*byUser:no_sqledit is only use to replace 'byUser:no' when merchant upgrade cannot proceed",,,gbmock_t3442mer003,3442,TWM - Real Basketball,50,yes,,,,,,,
+"**to manual trigger using PG group,eg 'initialise resetA'(165) & 'BetDelay 1'(275)
+all value muz tally with PG group. Except For 999, can put empty,py will change to 999
+
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:165
+isManualRevised:999
+
+memberSettingProfileID:999
+spreadGroupID:999
+memberCategoryID:999
+isAdvised:999
+memberProfileGroupID:275
+isManualRevised:999",,,gbmock_t3442mer040,3442,EGON,30,yes,,,,,,,
+"**to manual trigger w/o PG group ,upd only field that is to be updated,the rest leave them empty.py will manual upd to 999(eg.isManualRevised will send as 999 no change to system)
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,gbmock_t3442mer040,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:4
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:4
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+,,,gbmock_t3442mer005,3442,TWM - Real Basketball,50,yes,,,,,,,
+"*==Prerequisite fields Notes:==
+*to initialise member,
+due to bugs/design:(1) when update from compliance, sys upd only into mysql user columns. when update from merch, sys upd into both user & merchant columns. (2) when performing manual trigger(by compliance /merchant) ,no update will happen if member's existing BL/SG is of the same value.
+   For all TC, always initialise with 100%,A. this is to ensure testcase really starts executing from fresh. if existing manual value(especially merch) is not clear, it might cause all hit before the last hit to yield diff result than the one u documented. Do below:
+   1)TC WITHOUT merchUpd->initialise with complianceUpd 100%/A. 
+   2)TC WITH merchUpd->initialise with MerchUpd 100%/A 1st, then ComplianceUpd(except BL/SG,cox they're already updated by merchant, it wont get updated anymore if existing is same value)
+   3)for all ManualUpd(compl/merch) in TC, MAKE SURE VALUE TO UPDATE IS DIFF FROM EXISTING ONE,else no update will happen(my py will throw warning for this). in case same, add 1 more update in front with different value.
+*to save time on initialization, only use gbmock_txxxMERxxx for TC with merchValue(i.egbmock_t3442mer#). so only few members need merchant update.
+
+",scn#2_tc#1,,gbmock_t3442n015,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+"*byUser:yes is to manual trigger from GB
+*byUser:no is to manual trigger as Merchant from SFBO
+*byUser:no_sqledit is only use to replace 'byUser:no' when merchant upgrade cannot proceed",,,gbmock_t3442n015,3442,EGON,30,yes,,,,,,,
+"**to manual trigger using PG group,eg 'initialise resetA'(165) & 'BetDelay 1'(275)
+all value muz tally with PG group. Except For 999, can put empty,py will change to 999
+
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:165
+isManualRevised:999
+
+memberSettingProfileID:999
+spreadGroupID:999
+memberCategoryID:999
+isAdvised:999
+memberProfileGroupID:275
+isManualRevised:999",,,gbmock_t3442n015,3442,TWM - Real Basketball,50,yes,,,,,,,
+"**to manual trigger w/o PG group ,upd only field that is to be updated,the rest leave them empty.py will manual upd to 999(eg.isManualRevised will send as 999 no change to system)
+memberSettingProfileID:1
+spreadGroupID:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",scn#2_tc#1b,,gbmock_t3442n056,3442,EGON,30,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+"*==gbRuleScore & toActionFlag ==
+*Gbfeature can ignore
+*Gbrule must have",,,gbmock_t3442n056,3442,TWM - Real Basketball,70,yes,,,,,,,
+"*===EditUpdatedDate===
+outsideValidPeriod:no  [yes=jz expired, no=almst expired]
+module_to_Upd:EGON   [same as hitype/simulatortype]
+upd_module_DT:yes     [upd hit/action date of modules?]
+upd_memsetting_DT:yes  [up bd/sg/bl/memCat of member?]",,,gbmock_t3442n056,3442,MBR - Real Soccer,30,yes,,,,,,,
+,,,gbmock_t3442n056,3442,TWM - Real Basketball,50,yes,,,,,,,
+"* ==pre/post_actionOnOffFlag==
+*this is for featureOnOff_action flag. Value is on or off
+flag:off
+hittype_to_Upd:Arber - Real BB",scn#2_tc#2,,gbmock_t3442n016,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+"**hitType to use(simulator name):
+Arber - Real Soccer
+Arber - Real BB
+FAMember - Exceed API Count
+LateBet - Real Basketball
+MBR - Real Basketball
+MBR - Real Soccer
+ML UI Level - Robot
+ML Wager Level
+TWM - Real Basketball
+TWM - Real Soccer
+Late Bet
+FAMember - Invalid Key
+MLTag UI Arber
+EGON
+ISBBR - Real Basketball
+1H ART - Real Soccer
+FT ART - Real Soccer",,,gbmock_t3442n016,3442,MBR - Real Soccer,30,yes,,,,,,,
+,,,gbmock_t3442n016,3442,MBR - Real Basketball,50,yes,,,,,,,
+,scn#2_tc#3a_merch,,gbmock_t3442mer003,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer003,3442,TWM - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:2
+OthersBD:3
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+,,,gbmock_t3442mer003,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:3
+RealBbBD:3
+CyberBD:3
+OthersBD:3
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,,
+,scn#2_tc#3b_merch,,gbmock_t3442mer009,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer009,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:2
+RealBbBD:3
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,
+,,,gbmock_t3442mer009,3442,TWM - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:5
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,
+,scn#2_tc#3c_merch,,gbmock_t3442mer019,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,1
+,,,gbmock_t3442mer019,3442,TWM - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:5
+OthersBD:5
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,2
+,,,gbmock_t3442mer019,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:7
+RealSocBD:8
+RealBbBD:8
+CyberBD:8
+OthersBD:8
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,3
+,scn#2_tc#3d_merch,,gbmock_t3442mer033,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,1
+,,,gbmock_t3442mer033,3442,TWM - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:5
+OthersBD:5
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,2
+,,,gbmock_t3442mer033,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:8
+spreadGroupID:7
+RealSocBD:8
+RealBbBD:8
+CyberBD:8
+OthersBD:8
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,3
+,scn#2_tc#3e_merch,,gbmock_t3442mer024,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer024,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer024,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:5
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,
+,scn#2_tc#4_merch,,gbmock_t3442mer004,3442,EGON,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer004,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer004,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:5
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:3
+OthersBD:4
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+,scn#2_tc#4b_merch,,gbmock_t3442mer008,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer008,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer008,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:5
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:4
+RealBbBD:3
+CyberBD:2
+OthersBD:1
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,
+,scn#2_tc#4c_merch,,gbmock_t3442mer020,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer020,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer020,3442,MBR - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:3
+OthersBD:4
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:5
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,
+,scn#2_tc#4d_merch,,gbmock_t3442mer026,3442,EGON,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer026,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer026,3442,MBR - Real Basketball,50,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:3
+OthersBD:4
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:yes
+memberSettingProfileID:6
+spreadGroupID:5
+RealSocBD:4
+RealBbBD:3
+CyberBD:2
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,
+,scn#2_tc#4e,,gbmock_t3442n057,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n057,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:4
+RealBbBD:3
+CyberBD:2
+OthersBD:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,scn#2_tc#5,,gbmock_t3442n018,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n018,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n018,3442,EGON,50,yes,,,,,,,
+,scn#2_tc#6,,gbmock_t3442n019,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n019,3442,EGON,70,yes,,,,,,,
+,,,gbmock_t3442n019,3442,MBR - Real Basketball,50,yes,,,,,,,
+,scn#2_tc#7,,gbmock_t3442n036,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n036,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n036,3442,EGON,70,yes,,,,,,,
+,scn#2_tc#8,,gbmock_t3442n037,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n037,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n037,3442,MBR - Real Basketball,50,yes,,,,,,,
+x,scn#2_tc#9,,gbmock_t3442n061,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n061,3442,TWM - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n061,3442,MBR - Real Soccer,30,yes,,,,,,,
+,,,gbmock_t3442n061,3442,TWM - Real Basketball,50,yes,,,,,,,
+,scn#2_tc#10,,gbmock_t3442n038,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n038,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n038,3442,MBR - Real Basketball,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:EGON
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+,scn#2_tc#11,,gbmock_t3442n059,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n059,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n059,3442,EGON,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:MBR - Real Basketball
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+,scn#2_tc#12,,gbmock_t3442n060,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n060,3442,Arber - Real BB,60,yes,,,,,,,
+,,,gbmock_t3442n060,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n060,3442,TWM - Real Basketball,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+,scn#3_tc#1,,gbmock_t3442n024,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n024,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n024,3442,EGON,70,yes,,,,,,,
+,scn#3_tc#2,,gbmock_t3442n027,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n027,3442,MBR - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n027,3442,EGON,70,yes,,,,,,,
+,scn#3_tc#3,,gbmock_t3442n028,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n028,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n028,3442,MBR - Real Basketball,70,yes,,,,,,,
+,scn#3_tc#4,,gbmock_t3442n029,3442,EGON,60,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n029,3442,MBR - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n029,3442,TWM - Real Basketball,60,yes,,,,,,,
+,scn#3_tc#5,,gbmock_t3442n030,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n030,3442,EGON,70,yes,,,,,,,
+,,,gbmock_t3442n030,3442,MBR - Real Basketball,70,yes,,,,,,,
+,scn#3_tc#5b(tc#5feature),1,gbmock_t3442n075,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,2,gbmock_t3442n075,3442,EGON,70,yes,,,,,,,
+,,3,gbmock_t3442n075,3442,FAMember - Invalid Key,,action #2,,,,,,,
+,scn#3_tc#6a_merch,,gbmock_t3442mer005,3442,TWM - Real Basketball,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer005,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:5
+RealBbBD:0
+CyberBD:5
+OthersBD:0
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,
+,,,gbmock_t3442mer005,3442,EGON,70,yes,"byUser:no
+memberSettingProfileID:5
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,
+,scn#3_tc#6b_merch,,gbmock_t3442mer010,3442,TWM - Real Basketball,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer010,3442,EGON,70,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+x,,,gbmock_t3442mer010,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:3
+RealBbBD:3
+CyberBD:3
+OthersBD:3
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,,
+,scn#3_tc#6c_merch,,gbmock_t3442mer021,3442,TWM - Real Basketball,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer021,3442,EGON,70,yes,"byUser:no
+memberSettingProfileID:16
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:yes
+memberSettingProfileID:6
+spreadGroupID:7
+RealSocBD:5
+RealBbBD:5
+CyberBD:5
+OthersBD:5
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,
+,,,gbmock_t3442mer021,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:2
+spreadGroupID:2
+RealSocBD:3
+RealBbBD:2
+CyberBD:3
+OthersBD:3
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,,
+,scn#3_tc#6d,,gbmock_t3442n033,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n033,3442,MBR - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:3
+OthersBD:4
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,,
+,,,gbmock_t3442n033,3442,MBR - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:23
+spreadGroupID:1
+RealSocBD:4
+RealBbBD:6
+CyberBD:2
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,,
+,scn#3_tc#7a_merch,,gbmock_t3442mer011,3442,TWM - Real Basketball,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer011,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer011,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:5
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:2
+CyberBD:3
+OthersBD:4
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,
+,scn#3_tc#7b_merch,,gbmock_t3442mer012,3442,TWM - Real Basketball,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+memberCategoryID:
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer012,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer012,3442,EGON,70,yes,"byUser:no
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:5
+spreadGroupID:1
+RealSocBD:6
+RealBbBD:5
+CyberBD:4
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+,scn#4_tc#1,,gbmock_t3442n058,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n058,3442,MBR - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n058,3442,EGON,50,yes,,,,,,,
+,scn#4_tc#1b(feature),4,gbmock_t3442n020,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,5,gbmock_t3442n020,3442,FAMember - Invalid Key,,action #2,,,,,,,
+,,6,gbmock_t3442n020,3442,EGON,50,yes,,,,,,,
+,scn#4_tc#2,,gbmock_t3442n014,3442,MBR - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n014,3442,EGON,50,yes,,,,,,,
+,scn#4_tc#3,,gbmock_t3442n015,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n015,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n015,3442,EGON,50,yes,,,,,,,
+,scn#4_tc#4_merch,,gbmock_t3442mer006,3442,TWM - Real Basketball,70,yes,"byUser:no
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:
+spreadGroupID:
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,
+,,,gbmock_t3442mer006,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442mer006,3442,EGON,50,yes,"byUser:no
+memberSettingProfileID:4
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:4
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+,scn#4_tc#5,,gbmock_t3442n032,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n032,3442,MBR - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n032,3442,EGON,50,yes,,,,,,,
+,scn#4_tc#5(feature),7,gbmock_t3442n021,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,8,gbmock_t3442n021,3442,FAMember - Invalid Key,,action #2,,,,,,,
+,,9,gbmock_t3442n021,3442,EGON,50,yes,,,,,,,
+8,scn#4_tc#6,,gbmock_t3442n071,3442,FAMember - Invalid Key,,action #1,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+9,,,gbmock_t3442n071,3442,ISBBR - Real Basketball,,action #1,,,,,,,
+10,,,gbmock_t3442n071,3442,EGON,50,yes,,,,"outsideValidPeriod:no
+module_to_Upd:ISBBR - Real Basketball
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+11,,,gbmock_t3442n071,3442,EGON,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:ISBBR - Real Basketball
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+,scn#4_tc#7,,gbmock_t3442n015,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n015,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n015,3442,Arber - Real BB,60,yes,,,,,,,
+,scn#4_tc#7(feature),10,gbmock_t3442n031,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,action2 already?,11,gbmock_t3442n031,3442,TWM - Real Basketball,50,yes,,,,,,,
+,,12,gbmock_t3442n031,3442,FAMember - Invalid Key,,action #2,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:1
+RealSocBD:1
+RealBbBD:3
+CyberBD:6
+OthersBD:4
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,scn#4_tc#8,,gbmock_t3442n016,3442,TWM - Real Basketball,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n016,3442,EGON,50,yes,,,,,,,
+,,,gbmock_t3442n016,3442,MBR - Real Basketball,70,yes,,,,,,,
+,scn#4_tc#9,,gbmock_t3442n017,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n017,3442,EGON,50,yes,,,,,,,
+,,,gbmock_t3442n017,3442,MBR - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n017,3442,MBR - Real Basketball,50,yes,,,,"outsideValidPeriod:yes
+module_to_Upd:TWM - Real Basketball
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+,scn#4_tc#10,,gbmock_t3442n018,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n018,3442,TWM - Real Basketball,70,yes,,,,,,,
+,"scn#4_tc#11a_merch
+
+",,gbmock_t3442mer022,3442,EGON,10,yes,"byUser:yes
+memberSettingProfileID:4
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:3
+OthersBD:4
+memberCategoryID:5
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,
+,,,gbmock_t3442mer022,3442,TWM - Real Basketball,70,yes,,,,,,,
+,"scn#4_tc#11b_merch
+
+",,gbmock_t3442mer027,3442,EGON,10,yes,"byUser:yes
+memberSettingProfileID:6
+spreadGroupID:6
+RealSocBD:7
+RealBbBD:7
+CyberBD:2
+OthersBD:1
+memberCategoryID:5
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:no
+memberSettingProfileID:5
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,,
+,,,gbmock_t3442mer027,3442,TWM - Real Basketball,70,yes,,,,,,,
+,"scn#4_tc#11c_merch
+
+",,gbmock_t3442mer025,3442,EGON,10,yes,"byUser:no
+memberSettingProfileID:23
+spreadGroupID:5
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:3
+spreadGroupID:6
+RealSocBD:0
+RealBbBD:2
+CyberBD:1
+OthersBD:4
+memberCategoryID:5
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,
+,,,gbmock_t3442mer025,3442,TWM - Real Basketball,70,yes,,,,,,,
+,scn#4_tc#11d_merch,,gbmock_t3442mer023,3442,EGON,10,yes,"byUser:no
+memberSettingProfileID:3
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:17
+spreadGroupID:2
+RealSocBD:7
+RealBbBD:7
+CyberBD:7
+OthersBD:7
+memberCategoryID:5
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:yes
+memberSettingProfileID:16
+spreadGroupID:6
+RealSocBD:1
+RealBbBD:2
+CyberBD:1
+OthersBD:1
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,
+,,,gbmock_t3442mer023,3442,TWM - Real Basketball,70,yes,,,,,,,
+,scn#4_tc#11e_merch,,gbmock_t3442mer028,3442,EGON,10,yes,"byUser:no
+memberSettingProfileID:18
+spreadGroupID:1
+RealSocBD:
+RealBbBD:
+CyberBD:
+OthersBD:
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:","byUser:yes
+memberSettingProfileID:4
+spreadGroupID:2
+RealSocBD:1
+RealBbBD:1
+CyberBD:1
+OthersBD:1
+memberCategoryID:5
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2","byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:5
+RealBbBD:1
+CyberBD:5
+OthersBD:5
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:",,,,
+,,,gbmock_t3442mer028,3442,TWM - Real Basketball,70,yes,,,,,,,
+,scn#4_tc#11f,,gbmock_t3442n039,3442,EGON,20,yes,"byUser:yes
+memberSettingProfileID:5
+spreadGroupID:6
+RealSocBD:7
+RealBbBD:7
+CyberBD:7
+OthersBD:7
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,,
+,,,gbmock_t3442n039,3442,TWM - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n039,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:7
+spreadGroupID:6
+RealSocBD:2
+RealBbBD:2
+CyberBD:2
+OthersBD:2
+memberCategoryID:1
+isAdvised:
+memberProfileGroupID:
+isManualRevised:2",,,,,,
+,scn#4_tc#12,,gbmock_t3442n019,3442,EGON,50,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n019,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:18
+spreadGroupID:3
+RealSocBD:5
+RealBbBD:5
+CyberBD:1
+OthersBD:1
+memberCategoryID:
+isAdvised:
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,scn#4_tc#13,,gbmock_t3442n038,3442,TWM - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n038,3442,EGON,50,yes,,,,,,,
+,,,gbmock_t3442n038,3442,TWM - Real Basketball,90,yes,,,,,,,
+,NoActMet#1,,gbmock_t3442n050,3442,MBR - Real Basketball,80,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n050,3442,EGON,40,yes,,,,,,,
+,,,gbmock_t3442n050,3442,LateBet - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n050,3442,MBR - Real Basketball,70,no,,,,,,,
+,,,gbmock_t3442n050,3442,EGON,40,no,,,,,,,
+,,,gbmock_t3442n050,3442,LateBet - Real Basketball,70,no,,,,,,,
+,,,gbmock_t3442n050,3442,LateBet - Real Basketball,70,no,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,NoActMet#1c,,gbmock_t3442n076,3442,MBR - Real Basketball,60,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n076,3442,EGON,40,yes,,,,,,,
+,,,gbmock_t3442n076,3442,MBR - Real Basketball,70,no,,,,,,,
+,NoActMet#1b,13,gbmock_t3442n056,3442,EGON,40,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,14,gbmock_t3442n056,3442,LateBet - Real Basketball,70,yes,,,,,,,
+,,15,gbmock_t3442n056,3442,FAMember - Invalid Key,,action #2,,,,,,,
+,,16,gbmock_t3442n056,3442,EGON,40,no,,,,,,,
+,,17,gbmock_t3442n056,3442,LateBet - Real Basketball,70,no,,,,,,,
+,NoActMet#2,18,gbmock_t3442n051,3442,MBR - Real Basketball,80,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,19,gbmock_t3442n051,3442,LateBet - Real Basketball,70,yes,,,,,,,
+,,20,gbmock_t3442n051,3442,MBR - Real Basketball,70,no,,,,,,,
+,,21,gbmock_t3442n051,3442,LateBet - Real Basketball,60,yes,,,,,"flag:off
+hittype_to_Upd:LateBet - Real Basketball","flag:on
+hittype_to_Upd:LateBet - Real Basketball",
+,,22,gbmock_t3442n051,3442,FAMember - Invalid Key,,action #2,,,,,,,
+,NoActMet#3,,gbmock_t3442n052,3442,MBR - Real Basketball,60,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n052,3442,Arber - Real BB,20,yes,,,,,,,
+,,,gbmock_t3442n052,3442,LateBet - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n052,3442,MBR - Real Basketball,50,no,,,,,,,
+,,,gbmock_t3442n052,3442,Arber - Real BB,50,no,,,,,,,
+,,,gbmock_t3442n052,3442,LateBet - Real Basketball,50,no,,,,,,,
+,,,gbmock_t3442n052,3442,LateBet - Real Basketball,50,no,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,NoActMet#4,,gbmock_t3442n053,3442,MBR - Real Basketball,60,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n053,3442,Arber - Real BB,20,no,,,,"outsideValidPeriod:yes
+module_to_Upd:MBR - Real Basketball
+upd_module_DT:yes
+upd_memsetting_DT:no",,,
+,,,gbmock_t3442n053,3442,LateBet - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n053,3442,MBR - Real Basketball,50,no,,,,,,,
+,,,gbmock_t3442n053,3442,Arber - Real BB,50,no,,,,,,,
+,,,gbmock_t3442n053,3442,LateBet - Real Basketball,50,yes,,,,,"flag:off
+hittype_to_Upd:LateBet - Real Basketball","flag:on
+hittype_to_Upd:LateBet - Real Basketball",
+,NoActMet#5,,gbmock_t3442n054,3442,MBR - Real Basketball,60,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,missing last step(as need manual trigger),,gbmock_t3442n054,3442,Arber - Real BB,20,yes,,,,,,,
+,,,gbmock_t3442n054,3442,MBR - Real Basketball,50,no,,,,,,,
+,,,gbmock_t3442n054,3442,Arber - Real BB,50,no,"byUser:yes
+memberSettingProfileID:1
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,"NoActMet#6
+*still got 1 last step need manual trigger",,gbmock_t3442n055,3442,MBR - Real Basketball,60,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,missing last step(as need manual trigger),,gbmock_t3442n055,3442,LateBet - Real Basketball,50,yes,,,,,,,
+,,,gbmock_t3442n055,3442,MBR - Real Basketball,50,no,,,,,,,
+,BetDelayGroup#1,,gbmock_t3442n062,3442,EGON,40,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n062,3442,MBR - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n062,3442,LateBet - Real Basketball,70,yes,,,,,,,
+,BetDelayGroup#2,,gbmock_t3442n063,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n063,3442,MBR - Real Basketball,70,yes,,,,,,,
+,,,gbmock_t3442n063,3442,MBR - Real Soccer,70,yes,,,,,,,
+,BetDelayGroup#3,,gbmock_t3442n064,3442,MBR - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n064,3442,EGON,40,yes,,,,,,,
+,BetDelayGroup#4,,gbmock_t3442n065,3442,MBR - Real Basketball,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+,,,gbmock_t3442n065,3442,MBR - Real Soccer,70,yes,,,,,,,
+,,,gbmock_t3442n065,3442,EGON,40,yes,,,,,,,
+14,BetDelayGroup#5,,gbmock_t3442n068,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+15,,,gbmock_t3442n068,3442,FAMember - Invalid Key,,action #1,,,,,,,
+16,,,gbmock_t3442n068,3442,LateBet - Real Basketball,90,yes,,,,,,,
+17,BetDelayGroup#6(same as #5 only step3 using score80),,gbmock_t3442n069,3442,EGON,70,yes,"byUser:yes
+memberSettingProfileID:12
+spreadGroupID:1
+RealSocBD:0
+RealBbBD:0
+CyberBD:0
+OthersBD:0
+memberCategoryID:5
+isAdvised:0
+memberProfileGroupID:
+isManualRevised:0",,,,,,
+18,,,gbmock_t3442n069,3442,FAMember - Invalid Key,,action #1,,,,,,,
+19,,,gbmock_t3442n069,3442,LateBet - Real Basketball,80,yes,,,,,,,
