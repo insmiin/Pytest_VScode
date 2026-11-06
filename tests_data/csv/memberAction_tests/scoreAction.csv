@@ -1,5 +1,5 @@
 notes(not used),traceability,testcase,memberCode,companyID,hitType,gbRuleScore,toActionFlag,prerequisite1,prerequisite2,prerequisite3,EditUpdatedDate,pre_actionOnOffFlag,post_actionOnOffFlag,,,
-,,1,gbmock_tdir004,3442,EGON,70,yes,"byUser:yes
+,,,gbmock_t3442n040,3442,MBR - Real Basketball,50,yes,"byUser:yes
 memberSettingProfileID:12
 spreadGroupID:1
 RealSocBD:0
@@ -10,18 +10,11 @@ memberCategoryID:5
 isAdvised:0
 memberProfileGroupID:
 isManualRevised:0",,,,,,,,
-,,,gbmock_t3442n040,3442,FAMember - Invalid Key,,Action#1,"byUser:yes
-memberSettingProfileID:1
-spreadGroupID:1
-RealSocBD:0
-RealBbBD:0
-CyberBD:0
-OthersBD:0
-memberCategoryID:5
-isAdvised:0
-memberProfileGroupID:
-isManualRevised:0",,,,,,,,9
-,,,gbmock_t3442n040,3442,MBR - Real Basketball,50,yes,,,,,,,,,10
+,,,gbmock_t3442n040,3442,Arber - Real BB,50,yes,,,,,,,,,
+,,,gbmock_t3442n040,3442,FAMember - Invalid Key,,Action#1,,,,"outsideValidPeriod:no
+module_to_Upd:Arber - Real BB
+upd_module_DT:yes
+upd_memsetting_DT:no",,,,,
 ,,,gbmock_t3442n040,3442,Arber - Real BB,20,yes,"byUser:yes
 memberSettingProfileID:6
 spreadGroupID:6
@@ -49,7 +42,7 @@ isManualRevised:",,,,,,,11
   3)editUpdByDate
  4)pre_actionOnOffFlag
  5)module hit
- 6)post_actionOnOffFlag(tear down)",cross#1,,gbmock_t3442n002,3442,MBR - Real Basketball,50,yes,"byUser:yes
+ 6)post_actionOnOffFlag(tear down)",cross#1,1,gbmock_t3442n002,3442,MBR - Real Basketball,50,yes,"byUser:yes
 memberSettingProfileID:1
 spreadGroupID:1
 RealSocBD:0
@@ -69,7 +62,7 @@ due to bugs/design:(1) when update from compliance, sys upd only into mysql user
    3)for all ManualUpd(compl/merch) in TC, MAKE SURE VALUE TO UPDATE IS DIFF FROM EXISTING ONE,else no update will happen(my py will throw warning for this). in case same, add 1 more update in front with different value.
 *to save time on initialization, only use gbmock_txxxMERxxx for TC with merchValue(i.egbmock_t3442mer#). so only few members need merchant update.
 
-",,,gbmock_t3442n002,3442,Arber - Real BB,50,yes,,,,,,,,,6
+",,2,gbmock_t3442n002,3442,Arber - Real BB,50,yes,,,,,,,,,6
 "*byUser:yes is to manual trigger from GB
 *byUser:no is to manual trigger as Merchant from SFBO
 *byUser:no_sqledit is only use to replace 'byUser:no' when merchant upgrade cannot proceed",,,gbmock_t3442n002,3442,FAMember - Invalid Key,,Action#1,,,,,,,,,7

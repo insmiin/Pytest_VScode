@@ -1,3 +1,5 @@
+#1. python save-cloudsql-login.py
+#2. gcloud auth application-default login
 # pytest tests\memberAction_tests\test_memberAction.py -v --tb=short    (tb=short, to avoid printing whole chunck of code)
 # pytest tests\memberAction_tests\test_memberAction.py -vs --tb=short   (vs, u will see it output all print statement on console,  realtime)
 # pytest tests\memberAction_tests\test_memberAction.py -v --tb=short --log-cli-level=INFO --log-file=memberAction_test.log --log-file-level=DEBUG
@@ -110,9 +112,10 @@ def assert_ActionUpdate(hitObject, smallest_rankNum, threshold_rankNum, memSetti
     , ids=lambda csv_filter: f"testcase_{csv_filter['testcase']}"
                          )
 # companies_list,api_session,mysql_connection only need to call 1 time per run
-def test_memAction(mysql_connection, companies_list, api_session, api_session_SF, api_MemHierarchyGroupList, \
+def test_memAction(bq_client, cloudmysql_page,companies_list, api_session, api_session_SF, api_MemHierarchyGroupList, \
                    api_CalcBL_CSfinalBL_mapping,api_assignedCS_delaymodifier_mapping,
-                   sportGroup_sportIDs_UImap_dict, prev_memberCode, prev_memberCode2,csv_filter):
+                   sportGroup_sportIDs_UImap_dict, 
+                   prev_memberCode, prev_memberCode2,csv_filter):
     logger.info("=" * 105)
     logger.info("=" * 42 + f"testcase_{csv_filter['testcase']}" + "=" * 53)
     logger.info("=" * 105)
@@ -253,30 +256,31 @@ def test_memAction(mysql_connection, companies_list, api_session, api_session_SF
         # i dint reset BL/SG/memCat yet,as initial cross/single module checking wont involved this attribute(to add if needed)
         if m_setupmember_resetHit_portion == True:
             if csv_filter['memberCode'] != prev_memberCode["value"]:
-                qhlp.reset_member_hits(mysql_connection, csv_filter)
+                qhlp.reset_member_hits(cloudmysql_page, csv_filter)
                 prev_memberCode["value"] = csv_filter['memberCode']
 
         # (initiated by csv)Before any system hit, initialise member setting by doing manual update. (both userValue & merchant update)
         # The ManualUpdate approach performs direct updates.
         if csv_filter['prerequisite1']:
-            ahlp.initialise_member(api_session, api_session_SF, mysql_connection, csv_filter,prev_memberCode2,p_appliedCS_value)
+            ahlp.initialise_member(api_session, api_session_SF, bq_client, csv_filter,prev_memberCode2,p_appliedCS_value)
 
         # for outside validity period testing:
         # to fabricate updatedDate of modulehit(mainActionTable,childActionTable) and/or updatedDate of membersetting(i.e BL/SG/BD/MemCat)
         # for crossModule, csv i set to update hitDate only( no update on membersetting field like bl,sg,bd,memCat cox cross module only check hitdate to determine validityperiod)
         # for singleModule, csv i set to update both hitDate and membersetting fields. (cox single use those field to determine validityperiod when lastupdby=diffModule)
         if csv_filter['EditUpdatedDate']:
-            qhlp.modify_HitDate_or_mem_attribute_date(mysql_connection, csv_filter)
+            qhlp.modify_HitDate_or_mem_attribute_date(cloudmysql_page, csv_filter)
         if csv_filter['pre_actionOnOffFlag']:
             ahlp.turn_OnOff_action_featureflag(api_session, csv_filter['pre_actionOnOffFlag'])
             time.sleep(4)  # time buffer to make sure flag is updated
 
 
     # 3 >>>>>  SAVE MEMBER'S SETTING (BL,SG,MemCat,isAdv,BetDelay) BEFORE HIT  <<<<<
-    memSetting_before_hit = qhlp.call_mySQL_query(mysql_connection, csv_filter, "getMemDetails_Mysql.sql", None)  # 1 dict
+
+    memSetting_before_hit = qhlp.call_big_query(bq_client, csv_filter, "getMemDetails_Mysql.sql", None)  # 1 dict
     logger.info(f"===memSetting_before_hit:===>   {memSetting_before_hit}")
-    #print('===memSetting_before_hit:===>', memSetting_before_hit)
-    memBetDelay_before_hit = qhlp.call_mySQL_query(mysql_connection, csv_filter, 'getMemBetDelay_Mysql.sql', None)  # 1 dict
+    memBetDelay_before_hit = qhlp.call_big_query(bq_client, csv_filter, 'getMemBetDelay_Mysql.sql', None)  # 1 dict
+    #logger.info(f"===memBetDelay_before_hit:===>   {memBetDelay_before_hit}")
     memBetDelay_before_hit_dict = {item['sportid']: item['gbMemberBetDelay'] for item in
                                    memBetDelay_before_hit}  # dict
     memBetDelay_before_hit_fmt = {}
@@ -322,17 +326,18 @@ def test_memAction(mysql_connection, companies_list, api_session, api_session_SF
     action_to_exclude = '95,96,98,99,100'  # excludes all Hit types where action is not supposed to be allowed
     # eg: featureOff,whitelist & SP/PG x found (for ActionCondNotMet, exclude only if neverMet since day 1. will cater in sql script)
     action_to_exclude_set = set(map(int, [x.strip() for x in action_to_exclude.split(',')]))
-    moduleHistory_after_hit = qhlp.call_mySQL_getHitHistory(mysql_connection, csv_filter, None, action_to_exclude,
-                                                       'AllHits')  # list of dict
+    moduleHistory_after_hit = qhlp.call_big_query_getHitHistory(bq_client, csv_filter, None, action_to_exclude,
+                                                       'AllHits','getMemHitHistory_Mysql.sql')  # list of dict
+
     hitObject.hit_Single_Or_CrossModule(moduleHistory_after_hit)
     if hitObject.crossModule:
         hitObject.determine_GB_EGON_crossstatus(moduleHistory_after_hit)
 
     # 6  >>>>>  GET MEMBER'S SETTING (BL,SG,MemCat,isAdv,BetDelay) AFTER HIT  <<<<<
-    memSetting_after_hit = qhlp.call_mySQL_query(mysql_connection, csv_filter, "getMemDetails_Mysql.sql", None)
+    memSetting_after_hit = qhlp.call_big_query(bq_client, csv_filter, "getMemDetails_Mysql.sql", None)
     #print('===memSetting_after_hit:===>', memSetting_after_hit)
     logger.info(f"===memSetting_after_hit:===> {memSetting_after_hit}")
-    memBetDelay_after_hit = qhlp.call_mySQL_query(mysql_connection, csv_filter, 'getMemBetDelay_Mysql.sql', None)  # 1 dict
+    memBetDelay_after_hit = qhlp.call_big_query(bq_client, csv_filter, 'getMemBetDelay_Mysql.sql', None)  # 1 dict
     memBetDelay_after_hit_dict = {item['sportid']: item['gbMemberBetDelay'] for item in memBetDelay_after_hit}
     #print('===memBetDelay_after_hit_dict:===>', memBetDelay_after_hit_dict)
     logger.info("===memBetDelay_after_hit_dict:===> {memBetDelay_after_hit_dict}")
@@ -341,7 +346,7 @@ def test_memAction(mysql_connection, companies_list, api_session, api_session_SF
     assert companyName is not None, f'not able to proceed as there is not matching companyID for companyName from csv_row'
 
     # 7&8 >>>>CHECK THAT TRIGGERRING IS SUCCESSFUL (BY ENSURING THAT ACTION HAS BEEN SAVED IN MYSQL & TALLY WITH DEFINED ACTION FROM SP/PG UI)    <<<<<
-    member_new_hit = ashlp.assert_new_hit_action(api_session, hitObject, companyName, mysql_connection,csv_filter,action_to_exclude)
+    member_new_hit = ashlp.assert_new_hit_action(api_session, hitObject, companyName, bq_client,csv_filter,action_to_exclude)
     new_Hit_Action = member_new_hit[0]
 
     # initialise the variables
@@ -389,7 +394,6 @@ def test_memAction(mysql_connection, companies_list, api_session, api_session_SF
                 hlp.get_most_severe_value_from_all_moduleHits(hitObject, moduleHistory_after_hit, msp_smallest_rankNum,
                                                           spread_smallest_rankNum, sportGroup_sportIDs_UImap_dict,
                                                           betDelay_Severest_dict)
-
         # if single Modules and currentHit(MSP) has value, directly assing current Hit value
         if hitObject.singleModule and new_Hit_Action['UpdateMemberProfile']:
             msp_smallest_rankNum = hlp.get_ranking_byID(new_Hit_Action['UpdateMemberProfile'], 'msp')
@@ -408,6 +412,7 @@ def test_memAction(mysql_connection, companies_list, api_session, api_session_SF
         # if single Modules and currentHit(SPREAD) has value, directly assing current Hit value
         if hitObject.singleModule and new_Hit_Action['UpdateMemberSpreadGroup']:
             spread_smallest_rankNum = hlp.get_ranking_byID(new_Hit_Action['UpdateMemberSpreadGroup'], 'spread')
+
         # if there is spread Action(either from Cross or Single Module)
         if spread_smallest_rankNum is not None:
             spread_threshold_rankNum = hlp.get_threshold(hitObject, memSetting_before_hit, to_apply_creditScore_BL,'spread')

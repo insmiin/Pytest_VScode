@@ -92,9 +92,12 @@ def get_most_severe_value_from_all_moduleHits(hitObject, moduleHistory_after_hit
 
 def to_apply_creditscore(creditScore_before_hit,msp_smallest_rankNum,msp_before_hit,p_CS_GT1_fullfill_otherConditions):
     # to change, right now i skip CSaction if noCS or CS>1 or memCat=molly,etc..(both BL & BD has same omit conditions)
-    if not creditScore_before_hit or (creditScore_before_hit and creditScore_before_hit > 1 and p_CS_GT1_fullfill_otherConditions==False ):  # @@change . see if there is a need to retrieve minCS from general setting
+    if not creditScore_before_hit   \
+        or (creditScore_before_hit and creditScore_before_hit > 1 and p_CS_GT1_fullfill_otherConditions==False ) \
+        or creditScore_before_hit == 1: #follow system to treat 1 to be noCS. 
+        #                   if CS=1 is considerto have creditScore, system will do final betlimit mapping in generalsetting, which give diff finalBL
         return False
-
+    
     if msp_smallest_rankNum is not None:
         BL_ori_raw_percentage_value = MemberProfileSettingMappers.get_perc_by_ranking(msp_smallest_rankNum)
         existing_BL_raw_percentage_value = MemberProfileSettingMappers.get_perc_by_id(msp_before_hit)
@@ -109,6 +112,8 @@ def creditScore_application_BL(msp_smallest_rankNum, api_CalcBL_CSfinalBL_mappin
     if to_apply_creditscore(creditScore_before_hit, msp_smallest_rankNum,msp_before_hit,p_CS_GT1_fullfill_otherConditions):
         BL_ori_raw_percentage_value = MemberProfileSettingMappers.get_perc_by_ranking(msp_smallest_rankNum)
         # retrieve the CS_finalBL rankNum if there is matching calculated_BL_raw_perc range
+        logger.info(f"BL_ori_raw_percentage_value11111:============ {BL_ori_raw_percentage_value})")
+        logger.info(f"creditScore_before_hit11111:============ {creditScore_before_hit})")
         calculated_BL_raw_perc = BL_ori_raw_percentage_value * creditScore_before_hit
         for mapping in api_CalcBL_CSfinalBL_mapping:
             # pass in argument(calculated_BL_raw_perc) into lambda function(that check if calculated_raw_BL is within defined range that map to CS_finalBL_ID)

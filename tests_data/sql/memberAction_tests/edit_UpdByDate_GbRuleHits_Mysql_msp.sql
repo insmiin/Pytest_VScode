@@ -11,7 +11,7 @@ SET
     ms.updatedAt = %(date_to_change_UTC)s,
     msp.updatedAt = %(date_to_change_UTC)s,
     msp.laUpdatedAt = CASE  -- if updateAt is expired, it also makes sense for lastAction to expire
-        WHEN msp.laUpdatedAt IS NOT NULL THEN @date_to_change_UTC
+        WHEN msp.laUpdatedAt IS NOT NULL THEN %(date_to_change_UTC)s
         ELSE msp.laUpdatedAt
     END
 

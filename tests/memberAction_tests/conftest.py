@@ -1,18 +1,8 @@
-import sys
-import os
-# root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-# sys.path.insert(0, root_dir)
-import requests
+
 import pytest
-from mysql.connector import Error
-import mysql.connector
-import requests
-#import test_scenarios.myConstants as const
 import tests.myConstants as const
 from tests.utils.api_utils import call_api
-#from test_scenarios.myHelperFunc import call_api
-#to add root directory into the sys.path, so that the script able to import module in root directory
-
+from google.api_core import exceptions as gexc
 from tests.memberAction_tests.mappingModule import SportGroupMapper
 import logging
 
@@ -173,19 +163,30 @@ def prev_memberCode2():
     return {"prev_mem": None,"prev_coyid":None,"prev_memid":None}
 
 @pytest.fixture(scope="session")
-def sportGroup_sportIDs_UImap_dict(mysql_connection):
+def sportGroup_sportIDs_UImap_dict(bq_client):
     try:
-        mycursor = mysql_connection.cursor(dictionary=True)
-        mysql_query = "SELECT sportID FROM GB_Qat.sports where sportID !=0"
-        mycursor.execute(mysql_query)
-        data = mycursor.fetchall()   #[{'sportID': 1}, {'sportID': 2}, {'sportID': 3}]
-        mysql_connection.commit()  # Ends the transaction
+
+        mysql_query = '''SELECT * FROM EXTERNAL_QUERY("ghostbuster-dev.asia-east1.GB_MySQL",
+"""
+SELECT sportID FROM GB_Qat.sports WHERE sportID != 0
+""")'''
+        job = bq_client.query(mysql_query)
+        data = [dict(row) for row in job.result()]
+        #logger.info(f"data=============={data}")
+        # mycursor = mysql_connection.cursor(dictionary=True)
+        # mycursor.execute(mysql_query)
+        # data = mycursor.fetchall()   #[{'sportID': 1}, {'sportID': 2}, {'sportID': 3}]
+        # mysql_connection.commit()  # Ends the transaction
         all_sportIDs_dict = [sport['sportID'] for sport in data]  #[1, 2, 3, 4,....,67]
-    except Error as err:
-        pytest.fail(f"MySQL getMemHitHistory_Mysql query error: {err}")
-    finally:
-        if mycursor:
-            mycursor.close()
+    except gexc.BadRequest as e:
+        pytest.fail(f"SQL error in sportGroup_sportIDs_UImap_dict fixture: {e.message}")
+    except gexc.GoogleAPICallError as e:
+        pytest.fail(f"BigQuery error for sportGroup_sportIDs_UImap_dict: {e.message}")
+    # except Error as err:
+    #     pytest.fail(f"MySQL getMemHitHistory_Mysql query error: {err}")
+    # finally:
+    #     if mycursor:
+    #         mycursor.close()
 
     SportGroup_SportID_mapping = SportGroupMapper.get_all()
     # Step 1: Collect all IDs that already appear in mapping (excluding key 1000)

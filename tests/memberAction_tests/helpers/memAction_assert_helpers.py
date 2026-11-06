@@ -17,8 +17,8 @@ def assert_new_hit_action(api_session, hitObject, companyName, mysql_connection,
     UI_defined_action = ahlp.get_action(api_session, hitObject, companyName, csv_filter['gbRuleScore'])
 
     # 8 >>>>> CHECK THAT TRIGGERRING IS SUCCESSFUL (BY ENSURING THAT ACTION HAS BEEN SAVED IN MYSQL & TALLY WITH DEFINED ACTION FROM SP/PG UI)    <<<<<
-    member_new_hit = qhlp.call_mySQL_getHitHistory(mysql_connection, csv_filter, hitObject.mysql_filter_statement,
-                                              action_to_exclude, 'NewHit')  # list of dict
+    member_new_hit = qhlp.call_big_query_getHitHistory(mysql_connection, csv_filter, hitObject.mysql_filter_statement,
+                                              action_to_exclude, 'NewHit','getMemHitHistory_Mysql.sql')  # list of dict
     assert len(member_new_hit) == 1, f'NewHit issue: either new hit is not successful & not saved in DB ORR there is >1 similar ModulehitType'
     new_Hit_Action = member_new_hit[0]
     #print('===new_Hit_Action:===>', new_Hit_Action)
