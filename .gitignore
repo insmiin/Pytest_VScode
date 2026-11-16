@@ -1,1 +1,5 @@
-/playwright/.auth/
+# Ignore everything inside .auth
+playwright/.auth/*
+
+# But allow .gitkeep
+!playwright/.auth/.gitkeep
