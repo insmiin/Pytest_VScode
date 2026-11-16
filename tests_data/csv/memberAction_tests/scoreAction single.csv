@@ -213,7 +213,7 @@ memberCategoryID:
 isAdvised:0
 memberProfileGroupID:
 isManualRevised:2",,,,
-,single_Scn#1_tc#2b1(merch),,gbmock_t3449mer012,3449,MBR - Real Basketball,40,yes,"byUser:no
+,single_Scn#1_tc#2b1(merch),6,gbmock_t3449mer012,3449,MBR - Real Basketball,40,yes,"byUser:no
 memberSettingProfileID:20
 spreadGroupID:6
 RealSocBD:
@@ -230,6 +230,7 @@ RealSocBD:5
 RealBbBD:5
 CyberBD:5
 OthersBD:5
+memberCategoryID:
 isAdvised:0
 memberProfileGroupID:
 isManualRevised:0",,,,
@@ -598,7 +599,7 @@ isManualRevised:0",,,,,
 hittype_to_Upd:Arber - Real BB","flag:on
 hittype_to_Upd:Arber - Real BB"
 ,,,gbmock_t3449n022,3449,MBR - Real Basketball,60,yes,,,,,,
-,single_Scn#3_tc#1b,1,gbmock_t3449n023,3449,Arber - Real BB,40,yes,"byUser:yes
+,single_Scn#3_tc#1b,,gbmock_t3449n023,3449,Arber - Real BB,40,yes,"byUser:yes
 memberSettingProfileID:1
 spreadGroupID:1
 RealSocBD:0
@@ -609,10 +610,10 @@ memberCategoryID:5
 isAdvised:0
 memberProfileGroupID:
 isManualRevised:0",,,,,
-,,2,gbmock_t3449n023,3449,Arber - Real BB,30,yes,,,,,"flag:off
+,,,gbmock_t3449n023,3449,Arber - Real BB,30,yes,,,,,"flag:off
 hittype_to_Upd:Arber - Real BB","flag:on
 hittype_to_Upd:Arber - Real BB"
-,,3,gbmock_t3449n023,3449,MBR - Real Basketball,70,yes,,,,,,
+,,,gbmock_t3449n023,3449,MBR - Real Basketball,70,yes,,,,,,
 ,single_Scn#3_tc#2,,gbmock_t3449n008,3449,Arber - Real BB,40,yes,"byUser:yes
 memberSettingProfileID:1
 spreadGroupID:1

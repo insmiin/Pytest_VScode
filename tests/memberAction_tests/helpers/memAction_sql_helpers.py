@@ -190,19 +190,19 @@ def call_big_query_getHitHistory(bq_client, csv_filter, p_input_filter, p_NoActi
     data = bqhlp.run_bq_query_with_input(bq_client, sql_file, params, p_input_filter, p_NoAction_statusID, whichHit)
     return data
 
-def reset_member_hits(cloudsql_page, csv_filter):
+def reset_member_hits(cloudmysql_page, csv_filter):
     # reset date to very old date to make sure it is outside validity period and will be ignored
     p_params = {
         'memberCode': csv_filter['memberCode'],
         'companyID': csv_filter['companyID'],
         'date_to_change_UTC': '2025-02-02 04:00:00'
     }
-    call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'reset_mem_GbRuleHits_Mysql_msp.sql', p_params)
-    call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'reset_mem_GbRuleHits_Mysql_mspa.sql', p_params)
-    call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'reset_mem_GbFeatureHits_Mysql.sql', p_params)
-    call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'reset_mem_BetDelay_Mysql.sql', p_params)
+    call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'reset_mem_GbRuleHits_Mysql_msp.sql', p_params)
+    call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'reset_mem_GbRuleHits_Mysql_mspa.sql', p_params)
+    call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'reset_mem_GbFeatureHits_Mysql.sql', p_params)
+    call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'reset_mem_BetDelay_Mysql.sql', p_params)
 
-def modify_HitDate_or_mem_attribute_date(cloudsql_page, csv_filter):
+def modify_HitDate_or_mem_attribute_date(cloudmysql_page, csv_filter):
     pairs = {}
 
     # convert prerequisite into json
@@ -239,12 +239,12 @@ def modify_HitDate_or_mem_attribute_date(cloudsql_page, csv_filter):
     # update the ScoreDate,ActionDate of inputted module
     if pairs['upd_module_DT'].lower() == 'yes':
         if ThisModuleTypeIs.GbRule:  # gbrule & egon
-            call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'edit_UpdByDate_GbRuleHits_Mysql_msp.sql', p_params)
-            call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'edit_UpdByDate_GbRuleHits_Mysql_mspa.sql', p_params)
+            call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'edit_UpdByDate_GbRuleHits_Mysql_msp.sql', p_params)
+            call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'edit_UpdByDate_GbRuleHits_Mysql_mspa.sql', p_params)
         else:  # gbfeature
-            call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'edit_UpdByDate_GbFeatureHits_Mysql.sql', p_params)
+            call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'edit_UpdByDate_GbFeatureHits_Mysql.sql', p_params)
 
     # update the lastupdateby of member's setting(bl,sg,bd,memCat)
     if pairs['upd_memsetting_DT'].lower() == 'yes':
-        call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'edit_UpdByDate_BD_Mysql.sql', p_params)
-        call_mySQL_upd_query_cloudsql_ui(cloudsql_page,csv_filter, 'edit_UpdByDate_BLSGMemCat_Mysql.sql', p_params)
+        call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'edit_UpdByDate_BD_Mysql.sql', p_params)
+        call_mySQL_upd_query_cloudsql_ui(cloudmysql_page,csv_filter, 'edit_UpdByDate_BLSGMemCat_Mysql.sql', p_params)

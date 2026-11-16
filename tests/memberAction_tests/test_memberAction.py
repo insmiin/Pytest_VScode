@@ -257,6 +257,7 @@ def test_memAction(bq_client, cloudmysql_page,companies_list, api_session, api_s
         if m_setupmember_resetHit_portion == True:
             if csv_filter['memberCode'] != prev_memberCode["value"]:
                 qhlp.reset_member_hits(cloudmysql_page, csv_filter)
+                #new_membercode = True
                 prev_memberCode["value"] = csv_filter['memberCode']
 
         # (initiated by csv)Before any system hit, initialise member setting by doing manual update. (both userValue & merchant update)

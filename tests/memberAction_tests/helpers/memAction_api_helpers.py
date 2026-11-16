@@ -150,13 +150,12 @@ def turn_OnOff_action_featureflag(api_session, csv_featureOnOff_actionFlag):
 
 
 def initialise_member(api_session, api_session_SF, mysql_connection, csv_filter,prev_memberCode2,p_appliedCS_value):
+    already_upd_appliedCS_value = False
     for i in range(1, 4):
         prerequisite = f"prerequisite{i}"
         if not csv_filter[prerequisite]:
             # return early if the rest of the pre-req is empty
             return
-
-
 
         # CONVERT CSV PREREQUISITE INTO JSON FORMAT
         pairs = {}
@@ -174,6 +173,12 @@ def initialise_member(api_session, api_session_SF, mysql_connection, csv_filter,
             else:
                 pairs[key] = int(value)
 
+        # update appliedCS value only once for the 1st prerequisite that has byUser=Yes. (to avoid multiple update on same member)
+        if pairs['byUser'].lower() == 'yes' and already_upd_appliedCS_value == False:
+            already_upd_appliedCS_value = True
+            const_applied_CS = p_appliedCS_value 
+        else:
+            const_applied_CS = None 
 
         #@@change559(to do. see if any changes on the request & response data after 559)
         # 1)RETRIEVE only MEMBERID from GB_API(memberlisting UI) for subsequent API use
@@ -264,7 +269,6 @@ def initialise_member(api_session, api_session_SF, mysql_connection, csv_filter,
             # !!memberProfileGroupUpdatedAt i default d value to d one belong to PG 'Reset_Initialise A' as it is more commonly used.(to review)
             # !!if wanna use other PG, pls update accordingly. the system will check
             url_upd = f"{const.API_BASE_URL}/MemberSetting/UpdateMemberByID"
-            const_applied_CS = p_appliedCS_value if i == 1 else None
             data = {"memberID": memList_memberid, "memberStatusID": 999, "isHousePlayer": 999,
                     "memberSettingProfileID": pairs['memberSettingProfileID'],
                     "spreadGroupID": pairs['spreadGroupID'], "memberCategoryID": pairs['memberCategoryID'],
